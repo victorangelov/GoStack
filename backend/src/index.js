@@ -1,6 +1,6 @@
 //importando express dentro de uma variável chamada express
 const express = require('express');
-const { uuid } = require('uuidv4');
+const { uuid, isUuid } = require('uuidv4');
 // declarando uma variável app que é igual a express agora a aplicação já está criada
 const app = express();
 
@@ -17,6 +17,36 @@ app.use(express.json());
 * Route Params: 
 * Request Body
 */
+
+/** Middleware:
+* * Middleware:
+* interceptador de requisições, ele pode interromper totalmente a requisição.
+* alterar dados da requisição.
+*/
+// função de logs do middleware de logs do backend
+function logRequests(request, response, next){
+    const {method, url} = request;
+    const logLabel = `[${method.toUpperCase()}] ${url}`;
+
+    console.log(logLabel);
+
+    return next(); // próximo middleware
+}
+//função para validar o ID
+function validateProjectId(request, response, next){
+    const {id} = request.params;
+
+    if(!isUuid(id)){
+        return response.status(400).json({ error: 'Invalid project ID.'});
+    }
+    return next();
+}
+
+//chamando o middleware de log do backend
+app.use(logRequests)
+
+//chamando o middleware de validação de id
+app.use('/projects/:id', validateProjectId);
 
 const projects = [];
 //rota para listar
